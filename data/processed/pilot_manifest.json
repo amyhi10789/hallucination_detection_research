@@ -1,0 +1,48 @@
+{
+  "config": {
+    "base_fact_count": 5,
+    "dataset": "akariasai/PopQA",
+    "dataset_split": "test",
+    "do_sample": false,
+    "exclude_ambiguous_single_word_subjects": true,
+    "excluded_relations": [
+      "color"
+    ],
+    "max_new_tokens": 32,
+    "model": "Qwen/Qwen2.5-0.5B-Instruct",
+    "model_revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+    "prompt_instruction": "Answer the factual question briefly. If you do not know, say 'I don't know.'",
+    "repetition_penalty": 1.0,
+    "seed": 20261106,
+    "temperature": 1.0,
+    "top_k": 0,
+    "top_p": 1.0,
+    "variants_per_fact": 4
+  },
+  "summary": {
+    "band_counts_by_fact": {
+      "high": 2,
+      "low": 2,
+      "middle": 1
+    },
+    "base_fact_count": 5,
+    "exclude_ambiguous_single_word_subjects": true,
+    "fact_ids": [
+      "popqa-6272166",
+      "popqa-3616134",
+      "popqa-3572626",
+      "popqa-5547877",
+      "popqa-1796951"
+    ],
+    "prompt_count": 20,
+    "relation_counts_by_fact": {
+      "director": 1,
+      "father": 1,
+      "occupation": 1,
+      "religion": 1,
+      "screenwriter": 1
+    },
+    "seed": 20261106,
+    "variants_per_fact": 4
+  }
+}

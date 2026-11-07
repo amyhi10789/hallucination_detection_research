@@ -1,0 +1,18 @@
+{
+  "dataset": "akariasai/PopQA",
+  "dataset_split": "test",
+  "seed": 20261106,
+  "base_fact_count": 5,
+  "variants_per_fact": 4,
+  "excluded_relations": ["color"],
+  "exclude_ambiguous_single_word_subjects": true,
+  "model": "Qwen/Qwen2.5-0.5B-Instruct",
+  "model_revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+  "prompt_instruction": "Answer the factual question briefly. If you do not know, say 'I don't know.'",
+  "max_new_tokens": 32,
+  "do_sample": false,
+  "temperature": 1.0,
+  "top_p": 1.0,
+  "top_k": 0,
+  "repetition_penalty": 1.0
+}

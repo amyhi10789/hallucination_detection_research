@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.tmp/
+.cache/
+
+# Editors and operating systems
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local datasets, model caches, and generated experiment artifacts
+data/raw/
+artifacts/
+outputs/
+checkpoints/
+*.pt
+*.pth
+*.safetensors
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example

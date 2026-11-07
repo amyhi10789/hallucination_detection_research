@@ -35,6 +35,28 @@ A detector is useful only if its confidence reflects the model's real likelihood
 5. **Test robustness.** Evaluate detector behavior on held-out paraphrases, subject domains, and model layers.
 6. **Improve the method.** Use the observed failure modes to design a detector or training procedure that emphasizes paraphrase consistency and domain generalization.
 
+### Paired paraphrase design
+
+The experimental unit is an underlying factual question, not an individual prompt string. Each selected PopQA fact is expanded into four prompts:
+
+1. the dataset's original wording;
+2. a lexical substitution;
+3. a syntactic reordering; and
+4. a concise request for the same information.
+
+Every variant preserves the subject, requested relation, and accepted answers. Two team members review meaning equivalence before model collection. All variants from one fact remain in the same train/validation/test split.
+
+Before sampling, the pilot excludes the `color` relation and ambiguous single-word subjects for non-geographic relations. This rule is applied before any model outputs are observed; it prevents questions such as “Who composed Time?” from conflating wording sensitivity with uncertainty about which work named *Time* is intended. The exclusion is recorded in the committed configuration and manifest.
+
+When PopQA supplies a disambiguated Wikipedia title, the sampler uses it in every wording—for example, `One Day (2011 film)` instead of only `One Day`. This preserves the target fact while reducing accidental entity ambiguity across the entire paraphrase group.
+
+This paired design supports two distinct measurements:
+
+- **behavioral sensitivity:** whether the model's answer changes from correct to incorrect across equivalent wordings;
+- **detector sensitivity:** how much the pre-generation detector score changes across those wordings, including cases where answer correctness does not change.
+
+The pilot uses 5 base facts × 4 wordings = 20 prompts. The full study will scale the number of base facts without changing the four-variant protocol.
+
 The central comparison is:
 
 ```text
@@ -70,15 +92,62 @@ Candidate metrics include AUROC and AUPRC for error detection, calibration error
 
 ## Getting Started
 
-There is currently nothing to install or run. Once the first implementation is committed, this section will document:
+The pilot pipeline is implemented for Windows PowerShell. From the repository root:
 
-- supported Python and hardware requirements;
-- environment setup and dependencies;
-- dataset preparation;
-- model access and storage requirements;
-- commands for training, evaluation, and reproducing figures.
+```powershell
+py -m venv .venv
+.\.venv\Scripts\python.exe -m pip install --upgrade pip
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+```
 
-Large model weights, caches, and restricted datasets will not be committed to the repository.
+Create the deterministic PopQA pilot:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\prepare_pilot.py
+```
+
+Before running the model, both researchers should inspect `data/processed/pilot_questions.jsonl` and change each `meaning_review_status` from `pending` to `approved` only when all four wordings request the same fact. Then collect answers and prompt-only hidden states:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\collect_pilot.py
+.\.venv\Scripts\python.exe scripts\verify_artifacts.py
+.\.venv\Scripts\python.exe scripts\export_review_sheet.py
+```
+
+For a plumbing-only run before human approval, `collect_pilot.py --allow-unreviewed` is available, but data from that run must not be used as final research data.
+
+To test one complete four-wording group before the full pilot, use:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\collect_pilot.py --fact-limit 1 --allow-unreviewed --output-dir artifacts\smoke
+.\.venv\Scripts\python.exe scripts\verify_artifacts.py --responses artifacts\smoke\responses.jsonl
+```
+
+Run the lightweight unit tests:
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest
+```
+
+The configuration is recorded in `config/pilot.json`. Generated model weights, hidden-state tensors, review exports, and caches are ignored by Git. The selected question manifest is kept under `data/processed` so the team can commit and reproduce it.
+
+The collector explicitly overrides the model card's sampling and repetition settings (`do_sample=false`, `temperature=1`, `top_p=1`, `top_k=0`, `repetition_penalty=1`). This makes generation genuinely greedy and allows the raw final-prompt logits to be checked directly against the first generated token.
+
+### Expected pilot artifacts
+
+- `data/processed/pilot_questions.jsonl`: five fact groups and their 20 wordings;
+- `data/processed/pilot_manifest.json`: seed, relation counts, popularity bands, and fixed fact IDs;
+- `artifacts/pilot/responses.jsonl`: prompts, answers, automatic labels, model metadata, and verification fields;
+- `artifacts/pilot/hidden_states/*.safetensors`: one `[layers + 1, hidden_size]` tensor per prompt;
+- `outputs/pilot_review.csv`: a human-review worksheet with separate reviewer and adjudication fields.
+
+The first model download may be several gigabytes and may take time. The recommended pilot model is `Qwen/Qwen2.5-0.5B-Instruct`; its Hugging Face commit is pinned in `config/pilot.json` and recorded with each response.
+
+### Implementation boundaries
+
+The current code implements dataset sampling, controlled paraphrases, answer generation, pre-generation hidden-state extraction, conservative automatic labels, review export, and artifact verification. Probe training and final statistical analysis will be implemented only after the pilot passes review, because their inputs and split protocol must first be frozen.
+
+Large model weights, caches, and generated tensors must not be committed to the repository.
 
 ## Team
 

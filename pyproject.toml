@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hallucination-detection-research"
+version = "0.1.0"
+description = "Paired-paraphrase experiments for pre-generation hidden-state hallucination detection"
+requires-python = ">=3.11"
+dependencies = [
+    "datasets>=4.0",
+    "safetensors>=0.5",
+    "torch>=2.10",
+    "transformers>=4.57,<6",
+]
+
+[project.optional-dependencies]
+analysis = [
+    "numpy>=2.0",
+    "pandas>=2.2",
+    "scikit-learn>=1.6",
+]
+dev = [
+    "pytest>=8.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
