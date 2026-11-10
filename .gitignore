@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.pytest-tmp/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Environments and editors
+.venv/
+venv/
+.idea/
+.vscode/
+
+# Model and dataset caches
+.cache/
+.hf_cache/
+huggingface_cache/
+
+# Generated data and run artifacts
+data/raw/
+data/cache/
+data/paraphrase_candidates*.csv
+results/*
+!results/README.md
+!results/.gitkeep
+
+# OS files
+.DS_Store
+Thumbs.db
+
